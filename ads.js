@@ -57,6 +57,52 @@ function requestAds() {
 
 
 
+function onAdsManagerLoaded(adsManagerLoadedEvent) {
+  // Get the ads manager.
+  adsManager = adsManagerLoadedEvent.getAdsManager(
+      videoContent);  // See API reference for contentPlayback
+
+  // Add listeners to the required events.
+  adsManager.addEventListener(
+      google.ima.AdErrorEvent.Type.AD_ERROR,
+      onAdError);
+  adsManager.addEventListener(
+      google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED,
+      onContentPauseRequested);
+  adsManager.addEventListener(
+      google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED,
+      onContentResumeRequested);
+
+  try {
+    // Initialize the ads manager. Ad rules playlist will start at this time.
+    adsManager.init(640, 360, google.ima.ViewMode.NORMAL);
+    // Call start to show ads. Single video and overlay ads will
+    // start at this time; this call will be ignored for ad rules, as ad rules
+    // ads start when the adsManager is initialized.
+    adsManager.start();
+  } catch (adError) {
+    // An error may be thrown if there was a problem with the VAST response.
+    // Play content here, because we won't be getting an ad.
+    videoContent.play();
+  }
+}
+
+function onContentPauseRequested() {
+  // This function is where you should setup UI for showing ads (e.g.
+  // display ad timer countdown, disable seeking, etc.)
+  videoContent.removeEventListener('ended', contentEndedListener);
+  videoContent.pause();
+}
+
+function onContentResumeRequested() {
+  // This function is where you should ensure that your UI is ready
+  // to play content.
+  videoContent.addEventListener('ended', contentEndedListener);
+  videoContent.play();
+}
+
+
+
 
 function onPlayButtonClick() {
   videoContent.play();
